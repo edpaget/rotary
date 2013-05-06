@@ -1,7 +1,7 @@
 (ns rotary.test.client
   (:use [rotary.client])
   (:use [clojure.test])
-  (:import [com.amazonaws.services.dynamodb.model ConditionalCheckFailedException]))
+  (:import [com.amazonaws.services.dynamodbv2.model ConditionalCheckFailedException]))
 
 (def cred {:access-key (get (System/getenv) "AMAZON_SECRET_ID")
            :secret-key (get (System/getenv) "AMAZON_SECRET_ACCESS_KEY")})
@@ -70,34 +70,27 @@
       [:delete table {id "3"}]
       [:delete table {id "4"}])
     
-    (is (= nil (get-item cred table "1")) "batch-write-item :delete failed")
-    (is (= nil (get-item cred table "2")) "batch-write-item :delete failed")
-    (is (= nil (get-item cred table "3")) "batch-write-item :delete failed")
-    (is (= nil (get-item cred table "4")) "batch-write-item :delete failed")))
+    (is (= nil (get-item cred table {id "1"})) "batch-write-item :delete failed")
+    (is (= nil (get-item cred table {id "2"})) "batch-write-item :delete failed")
+    (is (= nil (get-item cred table {id "3"})) "batch-write-item :delete failed")
+    (is (= nil (get-item cred table {id "4"})) "batch-write-item :delete failed")))
 
 (deftest conditional-put
-  (batch-write-item cred
-                    [:delete table {:hash-key "42"}]
-                    [:delete table {:hash-key "9"}]
-                    [:delete table {:hash-key "6"}]
-                    [:delete table {:hash-key "23"}])
-  (batch-write-item cred
-                    [:put table {id "42" attr "foo"}]
-                    [:put table {id "6" attr "foobar"}]
-                    [:put table {id "9" attr "foobaz"}])
-
-  ;; Should update item 42 to have attr bar
-  (put-item cred table {id "42" attr "bar"} :expected {attr "foo"})
-  (is (= "bar" ((get-item cred table "42") attr)))
+  (setup-table)
+ 
+  ;; Should update item 1 to have attr bar
+  (put-item cred table {id "1" attr "bar"} :expected {attr "foo"})
+  (is (= "bar" ((get-item cred table {id "1"}) attr)))
   
-  ;; Should fail to update item 6
-  (is (thrown? ConditionalCheckFailedException (put-item cred table {id "6" attr "baz"} :expected {id false})))
-  (is (not (= "baz" ((get-item cred table "6") attr))))  
+  ;; Should fail to update item 2
+  (is (thrown? ConditionalCheckFailedException 
+               (put-item cred table {id "2" attr "bar"} :expected {id false})))
+  (is (not (= "baz" ((get-item cred table {id "2"}) attr))))  
 
   ;; Should upate item 9 to have attr baz
-  (put-item cred table {id "9" attr "baz"} :expected {attr "foobaz"})
-  (is (= "baz" ((get-item cred table "9") attr)))
+  (put-item cred table {id "3" attr "foobaz"} :expected {attr "baz"})
+  (is (= "foobaz" ((get-item cred table {id "3"}) attr)))
 
   ;; Should add item 23
   (put-item cred table {id "23" attr "bar"} :expected {id false})
-  (is (not (= nil (get-item cred table "23")))))
+  (is (not (= nil (get-item cred table {id "23"})))))
