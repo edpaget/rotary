@@ -104,10 +104,7 @@
 (defn- local-indexes
   "Creates a vector of LocalSecondaryIndexes"
   [hash-key indexes]
-  (loop [is indexes acc []]
-    (if (empty? is)
-      acc
-      (recur (rest is) (conj acc (local-index hash-key (first is)))))))
+  (map (partial local-index hash-key) indexes))
 
 (defn- attribute-defintion
   "Creates an AttributeDefinition Object"
@@ -119,10 +116,8 @@
 (defn- attribute-definitions
   "Creates a vector of AttributeDefinition Objects"
   [defs]
-  (loop [ds defs acc []]
-    (if (empty? ds)
-      acc
-      (recur (rest ds) (conj acc (attribute-defintion (first ds)))))))
+  (map attribute-definition defs))
+
 
 (defn create-table
   "Create a table in DynamoDB with the given map of properties. The properties
