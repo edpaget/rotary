@@ -524,3 +524,16 @@
      (.query
       (db-client cred)
       (query-request table hash-key range options)))))
+
+(defn lazy-query
+  "Return all the items from a DynamoDB table matching a query (see query)
+  that automatically paginates as a lazy seq"
+  [cred table hash-key & range-and-options]
+  (let [[range options] (extract-range range-and-options)
+        results-seq (fn results-seq [& [last-key]]
+                      (lazy-seq
+                        (let [options (merge options {:last-key last-key})
+                              {:keys [items last-key]} (query cred table hash-key range options)]
+                          (if-not (nil? last-key)
+                            (concat items (results-seq last-key))
+                            items))))]))
