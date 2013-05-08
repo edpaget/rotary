@@ -107,7 +107,7 @@
   [hash-key indexes]
   (map (partial local-index hash-key) indexes))
 
-(defn- attribute-defintion
+(defn- attribute-definition
   "Creates an AttributeDefinition Object"
   [{key-name :name key-type :type}]
   (doto (AttributeDefinition.)
@@ -118,7 +118,6 @@
   "Creates a vector of AttributeDefinition Objects"
   [defs]
   (map attribute-definition defs))
-
 
 (defn create-table
   "Create a table in DynamoDB with the given map of properties. The properties
