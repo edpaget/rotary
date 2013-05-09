@@ -463,7 +463,7 @@
 (defn- normalize-operator
   "Maps Clojure operators to DynamoDB operators"
   [operator]
-  (let [operator-map {:> "GT" :>= "GE" :< "LT" :<= "LE" := "EQ"}
+  (let [operator-map {:> "GT" :>= "GE" :< "LT" :<= "LE" := "EQ" :<=> "BETWEEN"}
         op (->> operator name str/upper-case)]
     (operator-map (keyword op) op)))
 
