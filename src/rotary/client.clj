@@ -412,7 +412,6 @@
           (group-by #(name (second %)) requests)))))))
 
 (defn- result-map [results]
-  (println results)
   {:items (map item-map (.getItems results))
    :count (.getCount results)
    :last-key (as-map (.getLastEvaluatedKey results))})
@@ -535,4 +534,5 @@
                               {:keys [items last-key]} (query cred table hash-key range options)]
                           (if-not (nil? last-key)
                             (concat items (results-seq last-key))
-                            items))))]))
+                            items))))]
+    (results-seq)))
